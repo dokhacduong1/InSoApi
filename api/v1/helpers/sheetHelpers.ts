@@ -35,7 +35,7 @@ export function addDataCanChi(ws) {
 
 export function addNgayCung(ws, dataInfo) {
   const day = new Date(dataInfo).getDate();
-  const month = new Date(dataInfo).getMonth() + 1;
+  const month = new Date(dataInfo).getMonth() + 2;
   ws.cell(13, 2).string(month.toString()).style({ border: noBorderExecl });
   //B18
   ws.cell(18, 2).string(day.toString()).style({ border: noBorderExecl });
