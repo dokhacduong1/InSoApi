@@ -84,6 +84,8 @@ const createSheet = function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const title = req.body.title;
+            const positionUserInfo = req.body.positionUserInfo;
+            const positionAddress = req.body.positionAddress;
             const buffer = req.file.buffer;
             const workbook = xlsx_1.default.read(buffer, { type: "buffer" });
             const sheetName = workbook.SheetNames[0];
@@ -123,6 +125,8 @@ const createSheet = function (req, res) {
             const record = new sheet_model_1.default({
                 title: title,
                 data: stringFyData,
+                positionUserInfo: positionUserInfo,
+                positionAddress: positionAddress,
             });
             yield record.save();
             res.status(200).json({ code: 200, success: "Thêm dữ liệu thành công." });
@@ -141,46 +145,52 @@ const editSheet = function (req, res) {
         try {
             const id = req.body._id;
             const title = req.body.title;
+            const positionUserInfo = req.body.positionUserInfo;
+            const positionAddress = req.body.positionAddress;
             const buffer = req.file.buffer;
-            const workbook = xlsx_1.default.read(buffer, { type: "buffer" });
-            const sheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[sheetName];
-            let arrObject = [];
-            const range = xlsx_1.default.utils.decode_range(worksheet["!ref"]);
-            for (let rowNum = range.s.r - 1; rowNum <= range.e.r; rowNum++) {
-                for (let colNum = range.s.c - 1; colNum <= range.e.c; colNum++) {
-                    const position = { r: rowNum + 1, c: colNum + 1 };
-                    const cellIndex = xlsx_1.default.utils.encode_cell(position);
-                    const positionChar = xlsx_1.default.utils.encode_cell({
-                        r: rowNum + 1,
-                        c: colNum + 1,
-                    });
-                    const cell = worksheet[cellIndex];
-                    if (cell && cell.v) {
-                        const value = cell.v.toString();
-                        const ObjectValue = {
-                            position: position,
-                            value: value,
-                            positionChar: positionChar,
-                        };
-                        arrObject.push(ObjectValue);
-                    }
-                }
-            }
-            arrObject.sort((a, b) => {
-                if (a.positionChar < b.positionChar) {
-                    return -1;
-                }
-                if (a.positionChar > b.positionChar) {
-                    return 1;
-                }
-                return 0;
-            });
-            const stringFyData = JSON.stringify(arrObject);
             const record = {
                 title: title,
-                data: stringFyData,
+                positionUserInfo: positionUserInfo,
+                positionAddress: positionAddress,
             };
+            if (buffer) {
+                const workbook = xlsx_1.default.read(buffer, { type: "buffer" });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                let arrObject = [];
+                const range = xlsx_1.default.utils.decode_range(worksheet["!ref"]);
+                for (let rowNum = range.s.r - 1; rowNum <= range.e.r; rowNum++) {
+                    for (let colNum = range.s.c - 1; colNum <= range.e.c; colNum++) {
+                        const position = { r: rowNum + 1, c: colNum + 1 };
+                        const cellIndex = xlsx_1.default.utils.encode_cell(position);
+                        const positionChar = xlsx_1.default.utils.encode_cell({
+                            r: rowNum + 1,
+                            c: colNum + 1,
+                        });
+                        const cell = worksheet[cellIndex];
+                        if (cell && cell.v) {
+                            const value = cell.v.toString();
+                            const ObjectValue = {
+                                position: position,
+                                value: value,
+                                positionChar: positionChar,
+                            };
+                            arrObject.push(ObjectValue);
+                        }
+                    }
+                }
+                arrObject.sort((a, b) => {
+                    if (a.positionChar < b.positionChar) {
+                        return -1;
+                    }
+                    if (a.positionChar > b.positionChar) {
+                        return 1;
+                    }
+                    return 0;
+                });
+                const stringFyData = JSON.stringify(arrObject);
+                record["data"] = stringFyData;
+            }
             yield sheet_model_1.default.updateOne({ _id: id }, record);
             res.status(200).json({ code: 200, success: "Sửa dữ liệu thành công." });
         }
@@ -212,17 +222,17 @@ const printSheet = function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const listIdInfo = req.body.listIdInfo;
-            const sheetId = req.body.sheetId;
+            const listSheetId = req.body.sheetId;
             const dateInfo = req.body.date;
             const recordInfo = yield info_model_1.default.find({ _id: { $in: listIdInfo } });
-            const recordSheet = yield sheet_model_1.default.findOne({ _id: sheetId });
+            const recordSheets = yield sheet_model_1.default.find({ _id: { $in: listSheetId } });
             if (recordInfo.length === 0) {
                 res
                     .status(200)
                     .json({ code: 200, success: "Không có dữ liệu cá nhân nào." });
                 return;
             }
-            if (!recordSheet) {
+            if (recordSheets.length === 0) {
                 res.status(200).json({ code: 200, success: "Không có dữ liệu sớ nào." });
                 return;
             }
@@ -237,18 +247,20 @@ const printSheet = function (req, res) {
                     bold: true,
                 },
             });
-            for (let i = 0; i < convertDataInfoAll.length; i++) {
-                const ws = wb.addWorksheet(`${convertDataInfoAll[i].slug}${new Date().getTime()}`, optionsExecl_1.optionsExecl);
-                const convertData = JSON.parse(recordSheet.data);
-                convertData.forEach((row, index) => {
-                    ws.cell(row === null || row === void 0 ? void 0 : row.position["r"], (row === null || row === void 0 ? void 0 : row.position["c"]) + 1)
-                        .string(row.value)
-                        .style({ border: optionsExecl_1.noBorderExecl });
-                });
-                (0, sheetHelpers_1.addUserInfo)(ws, convertDataInfoAll[i].infoConvert);
-                (0, sheetHelpers_1.addAddress)(ws, convertDataInfoAll[i].address);
-                (0, sheetHelpers_1.addDataCanChi)(ws);
-                (0, sheetHelpers_1.addNgayCung)(ws, dateInfo);
+            for (let recordSheet of recordSheets) {
+                for (let i = 0; i < convertDataInfoAll.length; i++) {
+                    const ws = wb.addWorksheet(`${convertDataInfoAll[i].slug}${new Date().getTime()}`, optionsExecl_1.optionsExecl);
+                    const convertData = JSON.parse(recordSheet.data);
+                    convertData.forEach((row, index) => {
+                        ws.cell(row === null || row === void 0 ? void 0 : row.position["r"], (row === null || row === void 0 ? void 0 : row.position["c"]) + 1)
+                            .string(row.value)
+                            .style({ border: optionsExecl_1.noBorderExecl });
+                    });
+                    (0, sheetHelpers_1.addUserInfo)(ws, convertDataInfoAll[i].infoConvert, recordSheet === null || recordSheet === void 0 ? void 0 : recordSheet.positionUserInfo);
+                    (0, sheetHelpers_1.addAddress)(ws, convertDataInfoAll[i].address, recordSheet === null || recordSheet === void 0 ? void 0 : recordSheet.positionAddress);
+                    (0, sheetHelpers_1.addDataCanChi)(ws);
+                    (0, sheetHelpers_1.addNgayCung)(ws, dateInfo);
+                }
             }
             const buffer = yield wb.writeToBuffer();
             res.status(200).json({ code: 200, data: buffer.toString("base64") });

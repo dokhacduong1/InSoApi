@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.printSheet = exports.deleteSheet = exports.editSheet = exports.createSheet = void 0;
 const createSheet = function (req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { title } = req.body;
+        const { title, positionAddress, positionUserInfo } = req.body;
         const { file } = req;
         if (!title) {
             res.status(400).json({
@@ -25,6 +25,20 @@ const createSheet = function (req, res, next) {
             res.status(400).json({
                 code: 400,
                 message: "Vui lòng chọn file.",
+            });
+            return;
+        }
+        if (!positionAddress) {
+            res.status(400).json({
+                code: 400,
+                message: "Vui lòng nhập vị trí địa chỉ.",
+            });
+            return;
+        }
+        if (!positionUserInfo) {
+            res.status(400).json({
+                code: 400,
+                message: "Vui lòng nhập vị trí thông tin người dùng.",
             });
             return;
         }
@@ -41,7 +55,7 @@ const createSheet = function (req, res, next) {
 exports.createSheet = createSheet;
 const editSheet = function (req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { title } = req.body;
+        const { title, positionAddress, positionUserInfo } = req.body;
         const { file } = req;
         if (!title) {
             res.status(400).json({
@@ -54,6 +68,20 @@ const editSheet = function (req, res, next) {
             res.status(400).json({
                 code: 400,
                 message: "Vui lòng chọn file.",
+            });
+            return;
+        }
+        if (!positionAddress) {
+            res.status(400).json({
+                code: 400,
+                message: "Vui lòng nhập vị trí địa chỉ.",
+            });
+            return;
+        }
+        if (!positionUserInfo) {
+            res.status(400).json({
+                code: 400,
+                message: "Vui lòng nhập vị trí thông tin người dùng.",
             });
             return;
         }

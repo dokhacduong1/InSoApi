@@ -6,6 +6,8 @@ const sheetSchema = new mongoose.Schema(
   {
     title: String,
     data: String,
+    positionAddress:Number,
+    positionUserInfo:Number,
     slug: {
       type: String,
       slug: "title",

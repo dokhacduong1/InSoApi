@@ -9,6 +9,8 @@ mongoose_1.default.plugin(mongoose_slug_updater_1.default);
 const sheetSchema = new mongoose_1.default.Schema({
     title: String,
     data: String,
+    positionAddress: Number,
+    positionUserInfo: Number,
     slug: {
         type: String,
         slug: "title",

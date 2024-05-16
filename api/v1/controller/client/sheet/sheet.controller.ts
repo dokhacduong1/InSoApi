@@ -115,6 +115,8 @@ export const createSheet = async function (
 ): Promise<void> {
   try {
     const title = req.body.title;
+    const positionUserInfo = req.body.positionUserInfo;
+    const positionAddress = req.body.positionAddress;
     const buffer = req.file.buffer;
     const workbook = xlsx.read(buffer, { type: "buffer" });
     const sheetName = workbook.SheetNames[0]; // Chúng ta lấy tên của sheet đầu tiên
@@ -156,6 +158,8 @@ export const createSheet = async function (
     const record = new Sheet({
       title: title,
       data: stringFyData,
+      positionUserInfo: positionUserInfo,
+      positionAddress: positionAddress,
     });
     await record.save();
     res.status(200).json({ code: 200, success: "Thêm dữ liệu thành công." });
@@ -174,49 +178,57 @@ export const editSheet = async function (
   try {
     const id = req.body._id;
     const title = req.body.title;
-
+    const positionUserInfo = req.body.positionUserInfo;
+    const positionAddress = req.body.positionAddress;
     const buffer = req.file.buffer;
-    const workbook = xlsx.read(buffer, { type: "buffer" });
-    const sheetName = workbook.SheetNames[0]; // Chúng ta lấy tên của sheet đầu tiên
-    const worksheet = workbook.Sheets[sheetName];
-    let arrObject = [];
-    // Đọc dữ liệu từ tệp Excel và lưu vào cơ sở dữ liệu
-    const range = xlsx.utils.decode_range(worksheet["!ref"]);
-
-    for (let rowNum = range.s.r - 1; rowNum <= range.e.r; rowNum++) {
-      for (let colNum = range.s.c - 1; colNum <= range.e.c; colNum++) {
-        const position = { r: rowNum + 1, c: colNum + 1 }; // Vị trí của ô dưới dạng index
-        const cellIndex = xlsx.utils.encode_cell(position);
-        const positionChar = xlsx.utils.encode_cell({
-          r: rowNum + 1,
-          c: colNum + 1,
-        }); // Lấy vị trí của ô (dùng để duyệt vị trí dùng lại)
-        const cell = worksheet[cellIndex];
-        if (cell && cell.v) {
-          const value = cell.v.toString(); // Lấy giá trị của ô
-          const ObjectValue = {
-            position: position,
-            value: value,
-            positionChar: positionChar,
-          };
-          arrObject.push(ObjectValue);
-        }
-      }
-    }
-    arrObject.sort((a, b) => {
-      if (a.positionChar < b.positionChar) {
-        return -1;
-      }
-      if (a.positionChar > b.positionChar) {
-        return 1;
-      }
-      return 0;
-    });
-    const stringFyData = JSON.stringify(arrObject);
     const record = {
       title: title,
-      data: stringFyData,
+    
+      positionUserInfo: positionUserInfo,
+      positionAddress: positionAddress,
     };
+    if (buffer) {
+      const workbook = xlsx.read(buffer, { type: "buffer" });
+      const sheetName = workbook.SheetNames[0]; // Chúng ta lấy tên của sheet đầu tiên
+      const worksheet = workbook.Sheets[sheetName];
+      let arrObject = [];
+      // Đọc dữ liệu từ tệp Excel và lưu vào cơ sở dữ liệu
+      const range = xlsx.utils.decode_range(worksheet["!ref"]);
+
+      for (let rowNum = range.s.r - 1; rowNum <= range.e.r; rowNum++) {
+        for (let colNum = range.s.c - 1; colNum <= range.e.c; colNum++) {
+          const position = { r: rowNum + 1, c: colNum + 1 }; // Vị trí của ô dưới dạng index
+          const cellIndex = xlsx.utils.encode_cell(position);
+          const positionChar = xlsx.utils.encode_cell({
+            r: rowNum + 1,
+            c: colNum + 1,
+          }); // Lấy vị trí của ô (dùng để duyệt vị trí dùng lại)
+          const cell = worksheet[cellIndex];
+          if (cell && cell.v) {
+            const value = cell.v.toString(); // Lấy giá trị của ô
+            const ObjectValue = {
+              position: position,
+              value: value,
+              positionChar: positionChar,
+            };
+            arrObject.push(ObjectValue);
+          }
+        }
+      }
+      arrObject.sort((a, b) => {
+        if (a.positionChar < b.positionChar) {
+          return -1;
+        }
+        if (a.positionChar > b.positionChar) {
+          return 1;
+        }
+        return 0;
+      });
+      const stringFyData = JSON.stringify(arrObject);
+      record["data"] = stringFyData;
+    }
+
+    
     await Sheet.updateOne({ _id: id }, record);
     res.status(200).json({ code: 200, success: "Sửa dữ liệu thành công." });
   } catch (error) {
@@ -248,17 +260,20 @@ export const printSheet = async function (
 ): Promise<void> {
   try {
     const listIdInfo = req.body.listIdInfo;
-    const sheetId = req.body.sheetId;
+    const listSheetId = req.body.sheetId;
     const dateInfo = req.body.date;
     const recordInfo = await Info.find({ _id: { $in: listIdInfo } });
-    const recordSheet = await Sheet.findOne({ _id: sheetId });
+    const recordSheets = await Sheet.find({ _id: { $in: listSheetId } });
+
+    // res.status(200).json({ code: 200, data: "ok" });
+    // return;
     if (recordInfo.length === 0) {
       res
         .status(200)
         .json({ code: 200, success: "Không có dữ liệu cá nhân nào." });
       return;
     }
-    if (!recordSheet) {
+    if (recordSheets.length === 0) {
       res.status(200).json({ code: 200, success: "Không có dữ liệu sớ nào." });
       return;
     }
@@ -273,23 +288,33 @@ export const printSheet = async function (
         bold: true,
       },
     });
-    for (let i = 0; i < convertDataInfoAll.length; i++) {
-      const ws = wb.addWorksheet(
-        `${convertDataInfoAll[i].slug}${new Date().getTime()}`,
-        optionsExecl
-      );
-      const convertData = JSON.parse(recordSheet.data);
+    for (let recordSheet of recordSheets) {
+      for (let i = 0; i < convertDataInfoAll.length; i++) {
+        const ws = wb.addWorksheet(
+          `${convertDataInfoAll[i].slug}${new Date().getTime()}`,
+          optionsExecl
+        );
+        const convertData = JSON.parse(recordSheet.data);
 
-      convertData.forEach((row, index) => {
-        ws.cell(row?.position["r"], row?.position["c"] + 1)
-          .string(row.value)
-          .style({ border: noBorderExecl });
-      });
+        convertData.forEach((row, index) => {
+          ws.cell(row?.position["r"], row?.position["c"] + 1)
+            .string(row.value)
+            .style({ border: noBorderExecl });
+        });
 
-      addUserInfo(ws, convertDataInfoAll[i].infoConvert);
-      addAddress(ws, convertDataInfoAll[i].address);
-      addDataCanChi(ws);
-      addNgayCung(ws, dateInfo);
+        addUserInfo(
+          ws,
+          convertDataInfoAll[i].infoConvert,
+          recordSheet?.positionUserInfo
+        );
+        addAddress(
+          ws,
+          convertDataInfoAll[i].address,
+          recordSheet?.positionAddress
+        );
+        addDataCanChi(ws);
+        addNgayCung(ws, dateInfo);
+      }
     }
     const buffer = await wb.writeToBuffer();
     res.status(200).json({ code: 200, data: buffer.toString("base64") });
