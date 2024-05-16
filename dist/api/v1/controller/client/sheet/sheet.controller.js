@@ -249,7 +249,7 @@ const printSheet = function (req, res) {
             });
             for (let recordSheet of recordSheets) {
                 for (let i = 0; i < convertDataInfoAll.length; i++) {
-                    const ws = wb.addWorksheet(`${convertDataInfoAll[i].slug}${new Date().getTime()}`, optionsExecl_1.optionsExecl);
+                    const ws = wb.addWorksheet(`${convertDataInfoAll[i].slug}${new Date().getTime()}-${recordSheet === null || recordSheet === void 0 ? void 0 : recordSheet.slug}`, optionsExecl_1.optionsExecl);
                     const convertData = JSON.parse(recordSheet.data);
                     convertData.forEach((row, index) => {
                         ws.cell(row === null || row === void 0 ? void 0 : row.position["r"], (row === null || row === void 0 ? void 0 : row.position["c"]) + 1)

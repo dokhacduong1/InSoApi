@@ -291,7 +291,7 @@ export const printSheet = async function (
     for (let recordSheet of recordSheets) {
       for (let i = 0; i < convertDataInfoAll.length; i++) {
         const ws = wb.addWorksheet(
-          `${convertDataInfoAll[i].slug}${new Date().getTime()}`,
+          `${convertDataInfoAll[i].slug}${new Date().getTime()}-${recordSheet?.slug}`,
           optionsExecl
         );
         const convertData = JSON.parse(recordSheet.data);
