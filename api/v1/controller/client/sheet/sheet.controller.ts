@@ -280,7 +280,7 @@ export const printSheet = async function (
     const convertDataInfoAll = convertDataInfo(recordInfo);
     const wb = new excel.Workbook({
       defaultFont: {
-        size: 22,
+        size: 16,
         name: "Arial",
         bold: true,
       },
