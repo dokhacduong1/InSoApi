@@ -119,10 +119,14 @@ export const createSheet = async function (
     const positionUserInfo = req.body.positionUserInfo;
     const positionSurname = req.body.positionSurname;
     const [collumCheck,rowCheck]  =positionSurname.split("/");
-    const object0PositionUserInfo = {
-      column: parseInt(collumCheck),
-      row: parseInt(rowCheck)
+    let object0PositionUserInfo = {};
+    if(collumCheck === "0" && rowCheck === "0"){
+      object0PositionUserInfo = {
+        column: parseInt(collumCheck),
+        row: parseInt(rowCheck)
+      }
     }
+   
  
     const positionAddress = req.body.positionAddress;
     const buffer = req.file.buffer;
@@ -163,15 +167,19 @@ export const createSheet = async function (
       return 0;
     });
     const stringFyData = JSON.stringify(arrObject);
-    const record = new Sheet({
+
+    const record = {
       title: title,
       data: stringFyData,
       positionUserInfo: positionUserInfo,
       positionAddress: positionAddress,
-      positionSurname:object0PositionUserInfo
-    });
-   
-    await record.save();
+    
+    };
+    if(Object.keys(object0PositionUserInfo).length>0){
+      record["positionSurname"] = object0PositionUserInfo
+    }
+    const fullRecord = new Sheet(record)
+    await fullRecord.save();
     res.status(200).json({ code: 200, success: "Thêm dữ liệu thành công." });
   } catch (error) {
     res.status(500).json({
@@ -191,19 +199,27 @@ export const editSheet = async function (
     const positionUserInfo = req.body.positionUserInfo;
     const positionAddress = req.body.positionAddress;
     const positionSurname = req.body.positionSurname;
+   
     const [collumCheck,rowCheck]  =positionSurname.split("/");
-    const object0PositionUserInfo = {
-      column: parseInt(collumCheck),
-      row: parseInt(rowCheck)
+    let object0PositionUserInfo = {};
+    if(collumCheck === "0" && rowCheck === "0"){
+      object0PositionUserInfo = {
+        column: parseInt(collumCheck),
+        row: parseInt(rowCheck)
+      }
     }
+
     const buffer = req.file.buffer;
     const record = {
       title: title,
     
       positionUserInfo: positionUserInfo,
       positionAddress: positionAddress,
-      positionSurname:object0PositionUserInfo
+
     };
+    if(Object.keys(object0PositionUserInfo).length>0){
+      record["positionSurname"] = object0PositionUserInfo
+    }
     if (buffer) {
       const workbook = xlsx.read(buffer, { type: "buffer" });
       const sheetName = workbook.SheetNames[0]; // Chúng ta lấy tên của sheet đầu tiên
