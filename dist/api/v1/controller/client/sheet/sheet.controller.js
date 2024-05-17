@@ -87,13 +87,6 @@ const createSheet = function (req, res) {
             const positionUserInfo = req.body.positionUserInfo;
             const positionSurname = req.body.positionSurname;
             const [collumCheck, rowCheck] = positionSurname.split("/");
-            let object0PositionUserInfo = {};
-            if (collumCheck === "0" && rowCheck === "0") {
-                object0PositionUserInfo = {
-                    column: parseInt(collumCheck),
-                    row: parseInt(rowCheck)
-                };
-            }
             const positionAddress = req.body.positionAddress;
             const buffer = req.file.buffer;
             const workbook = xlsx_1.default.read(buffer, { type: "buffer" });
@@ -131,11 +124,16 @@ const createSheet = function (req, res) {
                 return 0;
             });
             const stringFyData = JSON.stringify(arrObject);
+            const object0PositionUserInfo = {
+                column: parseInt(collumCheck),
+                row: parseInt(rowCheck)
+            };
             const record = {
                 title: title,
                 data: stringFyData,
                 positionUserInfo: positionUserInfo,
                 positionAddress: positionAddress,
+                positionSurname: object0PositionUserInfo,
             };
             if (Object.keys(object0PositionUserInfo).length > 0) {
                 record["positionSurname"] = object0PositionUserInfo;
@@ -162,22 +160,17 @@ const editSheet = function (req, res) {
             const positionAddress = req.body.positionAddress;
             const positionSurname = req.body.positionSurname;
             const [collumCheck, rowCheck] = positionSurname.split("/");
-            let object0PositionUserInfo = {};
-            if (collumCheck === "0" && rowCheck === "0") {
-                object0PositionUserInfo = {
-                    column: parseInt(collumCheck),
-                    row: parseInt(rowCheck)
-                };
-            }
+            const object0PositionUserInfo = {
+                column: parseInt(collumCheck),
+                row: parseInt(rowCheck)
+            };
             const buffer = req.file.buffer;
             const record = {
                 title: title,
+                positionSurname: object0PositionUserInfo,
                 positionUserInfo: positionUserInfo,
                 positionAddress: positionAddress,
             };
-            if (Object.keys(object0PositionUserInfo).length > 0) {
-                record["positionSurname"] = object0PositionUserInfo;
-            }
             if (buffer) {
                 const workbook = xlsx_1.default.read(buffer, { type: "buffer" });
                 const sheetName = workbook.SheetNames[0];
@@ -245,7 +238,7 @@ const deleteSheet = function (req, res) {
 exports.deleteSheet = deleteSheet;
 const printSheet = function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b;
+        var _a, _b, _c, _d;
         try {
             const listIdInfo = req.body.listIdInfo;
             const listSheetId = req.body.sheetId;
@@ -278,7 +271,7 @@ const printSheet = function (req, res) {
                     const ws = wb.addWorksheet(`${convertDataInfoAll[i].slug}${new Date().getTime()}-${recordSheet === null || recordSheet === void 0 ? void 0 : recordSheet.slug}`, optionsExecl_1.optionsExecl);
                     const convertData = JSON.parse(recordSheet.data);
                     convertData.forEach((row, index) => {
-                        ws.cell((row === null || row === void 0 ? void 0 : row.position["r"]) + 1, (row === null || row === void 0 ? void 0 : row.position["c"]) + 1)
+                        ws.cell((row === null || row === void 0 ? void 0 : row.position["r"]) + 1 > 0 ? (row === null || row === void 0 ? void 0 : row.position["r"]) + 1 : 1, (row === null || row === void 0 ? void 0 : row.position["c"]) + 1 > 0 ? (row === null || row === void 0 ? void 0 : row.position["c"]) + 1 : 1)
                             .string(row.value)
                             .style({ border: optionsExecl_1.noBorderExecl });
                     });
@@ -287,8 +280,10 @@ const printSheet = function (req, res) {
                     (0, sheetHelpers_1.addDataCanChi)(ws);
                     (0, sheetHelpers_1.addNgayCung)(ws, dateInfo);
                     if (recordSheet === null || recordSheet === void 0 ? void 0 : recordSheet.positionSurname) {
-                        const hoGiaChu = (_b = (_a = convertDataInfoAll[i]) === null || _a === void 0 ? void 0 : _a.homeowners) === null || _b === void 0 ? void 0 : _b.split(" ")[0];
-                        (0, sheetHelpers_1.addThuongPhung)(ws, recordSheet === null || recordSheet === void 0 ? void 0 : recordSheet.positionSurname, hoGiaChu);
+                        if (((_a = recordSheet === null || recordSheet === void 0 ? void 0 : recordSheet.positionSurname) === null || _a === void 0 ? void 0 : _a.column) > 0 && ((_b = recordSheet === null || recordSheet === void 0 ? void 0 : recordSheet.positionSurname) === null || _b === void 0 ? void 0 : _b.row) > 0) {
+                            const hoGiaChu = (_d = (_c = convertDataInfoAll[i]) === null || _c === void 0 ? void 0 : _c.homeowners) === null || _d === void 0 ? void 0 : _d.split(" ")[0];
+                            (0, sheetHelpers_1.addThuongPhung)(ws, recordSheet === null || recordSheet === void 0 ? void 0 : recordSheet.positionSurname, hoGiaChu);
+                        }
                     }
                 }
             }

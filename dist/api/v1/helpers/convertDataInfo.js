@@ -10,7 +10,7 @@ function convertDataInfo(data) {
         }
         if (item.info_children.length > 0) {
             item.info_children.forEach(child => {
-                result += ` con ${child.name} ${currentYear - child.year + 1} tuổi`;
+                result += ` ${child.name} ${currentYear - child.year + 1} tuổi`;
             });
         }
         return Object.assign(Object.assign({}, item._doc), { infoConvert: result.split(" ").filter(str => str != " ") });

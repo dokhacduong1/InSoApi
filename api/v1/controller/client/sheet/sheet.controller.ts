@@ -119,13 +119,7 @@ export const createSheet = async function (
     const positionUserInfo = req.body.positionUserInfo;
     const positionSurname = req.body.positionSurname;
     const [collumCheck,rowCheck]  =positionSurname.split("/");
-    let object0PositionUserInfo = {};
-    if(collumCheck === "0" && rowCheck === "0"){
-      object0PositionUserInfo = {
-        column: parseInt(collumCheck),
-        row: parseInt(rowCheck)
-      }
-    }
+
    
  
     const positionAddress = req.body.positionAddress;
@@ -167,13 +161,17 @@ export const createSheet = async function (
       return 0;
     });
     const stringFyData = JSON.stringify(arrObject);
-
+    
+    const object0PositionUserInfo =   {
+      column: parseInt(collumCheck),
+      row: parseInt(rowCheck)
+    }
     const record = {
       title: title,
       data: stringFyData,
       positionUserInfo: positionUserInfo,
       positionAddress: positionAddress,
-    
+      positionSurname:object0PositionUserInfo,
     };
     if(Object.keys(object0PositionUserInfo).length>0){
       record["positionSurname"] = object0PositionUserInfo
@@ -201,25 +199,21 @@ export const editSheet = async function (
     const positionSurname = req.body.positionSurname;
    
     const [collumCheck,rowCheck]  =positionSurname.split("/");
-    let object0PositionUserInfo = {};
-    if(collumCheck === "0" && rowCheck === "0"){
-      object0PositionUserInfo = {
-        column: parseInt(collumCheck),
-        row: parseInt(rowCheck)
-      }
+    const object0PositionUserInfo =   {
+      column: parseInt(collumCheck),
+      row: parseInt(rowCheck)
     }
+   
 
     const buffer = req.file.buffer;
     const record = {
       title: title,
-    
+      positionSurname:object0PositionUserInfo,
       positionUserInfo: positionUserInfo,
       positionAddress: positionAddress,
 
     };
-    if(Object.keys(object0PositionUserInfo).length>0){
-      record["positionSurname"] = object0PositionUserInfo
-    }
+ 
     if (buffer) {
       const workbook = xlsx.read(buffer, { type: "buffer" });
       const sheetName = workbook.SheetNames[0]; // Chúng ta lấy tên của sheet đầu tiên
@@ -333,8 +327,8 @@ export const printSheet = async function (
       
         
         convertData.forEach((row, index) => {
-   
-          ws.cell(row?.position["r"]+1, row?.position["c"]+1)
+        
+          ws.cell(row?.position["r"]+1 > 0 ? row?.position["r"]+1 : 1 , row?.position["c"]+1 >0 ? row?.position["c"]+1 : 1)
             .string(row.value)
             .style({ border: noBorderExecl });
         });
@@ -349,11 +343,16 @@ export const printSheet = async function (
           convertDataInfoAll[i].address,
           recordSheet?.positionAddress
         );
+
         addDataCanChi(ws);
         addNgayCung(ws, dateInfo);
+      
         if(recordSheet?.positionSurname){
-          const hoGiaChu = convertDataInfoAll[i]?.homeowners?.split(" ")[0]
-          addThuongPhung(ws,recordSheet?.positionSurname,hoGiaChu)
+          if(recordSheet?.positionSurname?.column > 0 && recordSheet?.positionSurname?.row > 0){
+            const hoGiaChu = convertDataInfoAll[i]?.homeowners?.split(" ")[0]
+            addThuongPhung(ws,recordSheet?.positionSurname,hoGiaChu)
+          }
+         
         }
        
       }
