@@ -14,6 +14,7 @@ import {
   addAddress,
   addDataCanChi,
   addNgayCung,
+  addThuongPhung,
   addUserInfo,
 } from "../../../helpers/sheetHelpers";
 export const index = async function (
@@ -116,6 +117,13 @@ export const createSheet = async function (
   try {
     const title = req.body.title;
     const positionUserInfo = req.body.positionUserInfo;
+    const positionSurname = req.body.positionSurname;
+    const [collumCheck,rowCheck]  =positionSurname.split("/");
+    const object0PositionUserInfo = {
+      column: parseInt(collumCheck),
+      row: parseInt(rowCheck)
+    }
+ 
     const positionAddress = req.body.positionAddress;
     const buffer = req.file.buffer;
     const workbook = xlsx.read(buffer, { type: "buffer" });
@@ -160,7 +168,9 @@ export const createSheet = async function (
       data: stringFyData,
       positionUserInfo: positionUserInfo,
       positionAddress: positionAddress,
+      positionSurname:object0PositionUserInfo
     });
+   
     await record.save();
     res.status(200).json({ code: 200, success: "Thêm dữ liệu thành công." });
   } catch (error) {
@@ -180,12 +190,19 @@ export const editSheet = async function (
     const title = req.body.title;
     const positionUserInfo = req.body.positionUserInfo;
     const positionAddress = req.body.positionAddress;
+    const positionSurname = req.body.positionSurname;
+    const [collumCheck,rowCheck]  =positionSurname.split("/");
+    const object0PositionUserInfo = {
+      column: parseInt(collumCheck),
+      row: parseInt(rowCheck)
+    }
     const buffer = req.file.buffer;
     const record = {
       title: title,
     
       positionUserInfo: positionUserInfo,
       positionAddress: positionAddress,
+      positionSurname:object0PositionUserInfo
     };
     if (buffer) {
       const workbook = xlsx.read(buffer, { type: "buffer" });
@@ -211,6 +228,7 @@ export const editSheet = async function (
               value: value,
               positionChar: positionChar,
             };
+       
             arrObject.push(ObjectValue);
           }
         }
@@ -289,19 +307,22 @@ export const printSheet = async function (
       },
     });
     for (let recordSheet of recordSheets) {
+     
       for (let i = 0; i < convertDataInfoAll.length; i++) {
         const ws = wb.addWorksheet(
           `${convertDataInfoAll[i].slug}${new Date().getTime()}-${recordSheet?.slug}`,
           optionsExecl
         );
         const convertData = JSON.parse(recordSheet.data);
-
+      
+        
         convertData.forEach((row, index) => {
-          ws.cell(row?.position["r"], row?.position["c"] + 1)
+   
+          ws.cell(row?.position["r"]+1, row?.position["c"]+1)
             .string(row.value)
             .style({ border: noBorderExecl });
         });
-
+       
         addUserInfo(
           ws,
           convertDataInfoAll[i].infoConvert,
@@ -314,6 +335,11 @@ export const printSheet = async function (
         );
         addDataCanChi(ws);
         addNgayCung(ws, dateInfo);
+        if(recordSheet?.positionSurname){
+          const hoGiaChu = convertDataInfoAll[i]?.homeowners?.split(" ")[0]
+          addThuongPhung(ws,recordSheet?.positionSurname,hoGiaChu)
+        }
+       
       }
     }
     const buffer = await wb.writeToBuffer();

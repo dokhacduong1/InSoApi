@@ -11,6 +11,10 @@ const sheetSchema = new mongoose_1.default.Schema({
     data: String,
     positionAddress: Number,
     positionUserInfo: Number,
+    positionSurname: {
+        column: Number,
+        row: Number
+    },
     slug: {
         type: String,
         slug: "title",

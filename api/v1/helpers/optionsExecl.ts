@@ -1,11 +1,11 @@
 export var optionsExecl = {
     margins: {
-      left: 0.16,
-      right: 0.24,
-      top: 1.01,
-      bottom: 0.75,
-      header: 0.3,
-      footer: 0.3,
+      left: 1.5,
+      right: 0.25,
+      top: 0,
+      bottom: 1.25,
+      header: 0,
+      footer: 0,
     },
     sheetFormat: {
       thickBottom: false,

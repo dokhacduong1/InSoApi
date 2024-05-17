@@ -12,8 +12,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.printSheet = exports.deleteSheet = exports.editSheet = exports.createSheet = void 0;
 const createSheet = function (req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { title, positionAddress, positionUserInfo } = req.body;
+        const { title, positionAddress, positionUserInfo, positionSurname } = req.body;
         const { file } = req;
+        if (!positionSurname) {
+            res.status(400).json({
+                code: 400,
+                message: "Vui lòng vị trí thượng phụng.",
+            });
+            return;
+        }
         if (!title) {
             res.status(400).json({
                 code: 400,
@@ -55,8 +62,15 @@ const createSheet = function (req, res, next) {
 exports.createSheet = createSheet;
 const editSheet = function (req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { title, positionAddress, positionUserInfo } = req.body;
+        const { title, positionAddress, positionUserInfo, positionSurname } = req.body;
         const { file } = req;
+        if (!positionSurname) {
+            res.status(400).json({
+                code: 400,
+                message: "Vui lòng vị trí thượng phụng.",
+            });
+            return;
+        }
         if (!title) {
             res.status(400).json({
                 code: 400,

@@ -34,9 +34,15 @@ export function addDataCanChi(ws) {
 }
 
 export function addNgayCung(ws, dataInfo) {
-  const day = new Date(dataInfo).getDate()+1;
+  const day = new Date(dataInfo).getDate();
   const month = new Date(dataInfo).getMonth() + 1;
   ws.cell(13, 2).string(month.toString()).style({ border: noBorderExecl });
   //B18
   ws.cell(18, 2).string(day.toString()).style({ border: noBorderExecl });
+}
+
+export function addThuongPhung(ws, positionSurname,hoGiaChu) {
+ 
+  ws.cell(positionSurname?.row, positionSurname?.column).string(hoGiaChu.toString()).style({ border: noBorderExecl });
+
 }

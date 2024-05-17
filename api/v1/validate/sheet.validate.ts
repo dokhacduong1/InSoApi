@@ -6,9 +6,15 @@ export const createSheet = async function (
   res: Response,
   next: any
 ): Promise<void> {
-  const { title, positionAddress, positionUserInfo } = req.body;
+  const { title, positionAddress, positionUserInfo, positionSurname } = req.body;
   const { file } = req;
-
+  if (!positionSurname) {
+    res.status(400).json({
+      code: 400,
+      message: "Vui lòng vị trí thượng phụng.",
+    });
+    return;
+  }
   if (!title) {
     res.status(400).json({
       code: 400,
@@ -52,9 +58,15 @@ export const editSheet = async function (
   res: Response,
   next: any
 ): Promise<void> {
-  const { title, positionAddress, positionUserInfo } = req.body;
+  const { title, positionAddress, positionUserInfo, positionSurname } = req.body;
   const { file } = req;
-
+  if (!positionSurname) {
+    res.status(400).json({
+      code: 400,
+      message: "Vui lòng vị trí thượng phụng.",
+    });
+    return;
+  }
   if (!title) {
     res.status(400).json({
       code: 400,
@@ -83,6 +95,7 @@ export const editSheet = async function (
     });
     return;
   }
+ 
 
   next();
   try {

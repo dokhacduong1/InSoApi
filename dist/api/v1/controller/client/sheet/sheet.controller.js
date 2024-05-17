@@ -85,6 +85,12 @@ const createSheet = function (req, res) {
         try {
             const title = req.body.title;
             const positionUserInfo = req.body.positionUserInfo;
+            const positionSurname = req.body.positionSurname;
+            const [collumCheck, rowCheck] = positionSurname.split("/");
+            const object0PositionUserInfo = {
+                column: parseInt(collumCheck),
+                row: parseInt(rowCheck)
+            };
             const positionAddress = req.body.positionAddress;
             const buffer = req.file.buffer;
             const workbook = xlsx_1.default.read(buffer, { type: "buffer" });
@@ -127,6 +133,7 @@ const createSheet = function (req, res) {
                 data: stringFyData,
                 positionUserInfo: positionUserInfo,
                 positionAddress: positionAddress,
+                positionSurname: object0PositionUserInfo
             });
             yield record.save();
             res.status(200).json({ code: 200, success: "Thêm dữ liệu thành công." });
@@ -147,11 +154,18 @@ const editSheet = function (req, res) {
             const title = req.body.title;
             const positionUserInfo = req.body.positionUserInfo;
             const positionAddress = req.body.positionAddress;
+            const positionSurname = req.body.positionSurname;
+            const [collumCheck, rowCheck] = positionSurname.split("/");
+            const object0PositionUserInfo = {
+                column: parseInt(collumCheck),
+                row: parseInt(rowCheck)
+            };
             const buffer = req.file.buffer;
             const record = {
                 title: title,
                 positionUserInfo: positionUserInfo,
                 positionAddress: positionAddress,
+                positionSurname: object0PositionUserInfo
             };
             if (buffer) {
                 const workbook = xlsx_1.default.read(buffer, { type: "buffer" });
@@ -220,6 +234,7 @@ const deleteSheet = function (req, res) {
 exports.deleteSheet = deleteSheet;
 const printSheet = function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
+        var _a, _b;
         try {
             const listIdInfo = req.body.listIdInfo;
             const listSheetId = req.body.sheetId;
@@ -252,7 +267,7 @@ const printSheet = function (req, res) {
                     const ws = wb.addWorksheet(`${convertDataInfoAll[i].slug}${new Date().getTime()}-${recordSheet === null || recordSheet === void 0 ? void 0 : recordSheet.slug}`, optionsExecl_1.optionsExecl);
                     const convertData = JSON.parse(recordSheet.data);
                     convertData.forEach((row, index) => {
-                        ws.cell(row === null || row === void 0 ? void 0 : row.position["r"], (row === null || row === void 0 ? void 0 : row.position["c"]) + 1)
+                        ws.cell((row === null || row === void 0 ? void 0 : row.position["r"]) + 1, (row === null || row === void 0 ? void 0 : row.position["c"]) + 1)
                             .string(row.value)
                             .style({ border: optionsExecl_1.noBorderExecl });
                     });
@@ -260,6 +275,10 @@ const printSheet = function (req, res) {
                     (0, sheetHelpers_1.addAddress)(ws, convertDataInfoAll[i].address, recordSheet === null || recordSheet === void 0 ? void 0 : recordSheet.positionAddress);
                     (0, sheetHelpers_1.addDataCanChi)(ws);
                     (0, sheetHelpers_1.addNgayCung)(ws, dateInfo);
+                    if (recordSheet === null || recordSheet === void 0 ? void 0 : recordSheet.positionSurname) {
+                        const hoGiaChu = (_b = (_a = convertDataInfoAll[i]) === null || _a === void 0 ? void 0 : _a.homeowners) === null || _b === void 0 ? void 0 : _b.split(" ")[0];
+                        (0, sheetHelpers_1.addThuongPhung)(ws, recordSheet === null || recordSheet === void 0 ? void 0 : recordSheet.positionSurname, hoGiaChu);
+                    }
                 }
             }
             const buffer = yield wb.writeToBuffer();
