@@ -13,8 +13,8 @@ exports.optionsExecl = {
     sheetFormat: {
         thickBottom: false,
         thickTop: false,
-        baseColWidth: 8,
-        defaultColWidth: 8,
+        baseColWidth: 10,
+        defaultColWidth: 10,
     },
     printOptions: {
         centerHorizontal: true,

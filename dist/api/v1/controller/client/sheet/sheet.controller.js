@@ -239,7 +239,7 @@ const printSheet = function (req, res) {
             const convertDataInfoAll = (0, convertDataInfo_1.convertDataInfo)(recordInfo);
             const wb = new excel4node_1.default.Workbook({
                 defaultFont: {
-                    size: 16,
+                    size: 22,
                     name: "Arial",
                     bold: true,
                 },
