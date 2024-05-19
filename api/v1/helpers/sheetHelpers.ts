@@ -3,7 +3,8 @@ import { tinhCanChi } from "./tinhCanChi";
 
 export function addUserInfo(ws, infoConvert, startColumn = 18) {
   for (let j = 0; j < infoConvert.length; j++) {
-    const column = startColumn + Math.floor(j / 30);
+
+    const column = startColumn + 2 * Math.floor(j / 30);
     const row = (j % 30) + 2;
 
     ws.cell(row, column)
@@ -15,7 +16,7 @@ export function addUserInfo(ws, infoConvert, startColumn = 18) {
 export function addAddress(ws, address, startColumnAddress = 22) {
   const addressSpilt = address.split(" ");
   for (let j = 0; j < addressSpilt.length; j++) {
-    const column = startColumnAddress + Math.floor(j / 30);
+    const column = startColumnAddress+2 + Math.floor(j / 30);
     const row = (j % 30) + 5;
 
     ws.cell(row, column)
