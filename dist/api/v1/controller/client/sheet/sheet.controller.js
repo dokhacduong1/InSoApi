@@ -156,8 +156,8 @@ const editSheet = function (req, res) {
         try {
             const id = req.body._id;
             const title = req.body.title;
-            const positionUserInfo = req.body.positionUserInfo - 1;
-            const positionAddress = req.body.positionAddress - 1;
+            const positionUserInfo = req.body.positionUserInfo;
+            const positionAddress = req.body.positionAddress;
             const positionSurname = req.body.positionSurname;
             const [collumCheck, rowCheck] = positionSurname.split("/");
             const object0PositionUserInfo = {
