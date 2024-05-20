@@ -116,13 +116,13 @@ export const createSheet = async function (
 ): Promise<void> {
   try {
     const title = req.body.title;
-    const positionUserInfo = req.body.positionUserInfo;
+    const positionUserInfo = req.body.positionUserInfo-1;
     const positionSurname = req.body.positionSurname;
     const [collumCheck,rowCheck]  =positionSurname.split("/");
 
    
  
-    const positionAddress = req.body.positionAddress;
+    const positionAddress = req.body.positionAddress-1;
     const buffer = req.file.buffer;
     const workbook = xlsx.read(buffer, { type: "buffer" });
     const sheetName = workbook.SheetNames[0]; // Chúng ta lấy tên của sheet đầu tiên
@@ -194,8 +194,8 @@ export const editSheet = async function (
   try {
     const id = req.body._id;
     const title = req.body.title;
-    const positionUserInfo = req.body.positionUserInfo;
-    const positionAddress = req.body.positionAddress;
+    const positionUserInfo = req.body.positionUserInfo-1;
+    const positionAddress = req.body.positionAddress-1;
     const positionSurname = req.body.positionSurname;
    
     const [collumCheck,rowCheck]  =positionSurname.split("/");

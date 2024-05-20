@@ -84,10 +84,10 @@ const createSheet = function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const title = req.body.title;
-            const positionUserInfo = req.body.positionUserInfo;
+            const positionUserInfo = req.body.positionUserInfo - 1;
             const positionSurname = req.body.positionSurname;
             const [collumCheck, rowCheck] = positionSurname.split("/");
-            const positionAddress = req.body.positionAddress;
+            const positionAddress = req.body.positionAddress - 1;
             const buffer = req.file.buffer;
             const workbook = xlsx_1.default.read(buffer, { type: "buffer" });
             const sheetName = workbook.SheetNames[0];
@@ -156,8 +156,8 @@ const editSheet = function (req, res) {
         try {
             const id = req.body._id;
             const title = req.body.title;
-            const positionUserInfo = req.body.positionUserInfo;
-            const positionAddress = req.body.positionAddress;
+            const positionUserInfo = req.body.positionUserInfo - 1;
+            const positionAddress = req.body.positionAddress - 1;
             const positionSurname = req.body.positionSurname;
             const [collumCheck, rowCheck] = positionSurname.split("/");
             const object0PositionUserInfo = {
